@@ -183,6 +183,33 @@
         </div>
     </section>
 
+    <!-- Auth Section -->
+    <section class="py-20 bg-gray-100">
+        <div class="container mx-auto px-4">
+            <div class="max-w-md mx-auto mb-10">
+                <h2 class="text-2xl font-bold mb-4">Registro</h2>
+                <form id="register-form" class="space-y-4">
+                    <input type="text" id="reg-username" placeholder="Usuario" class="w-full p-2 border rounded" required>
+                    <input type="password" id="reg-password" placeholder="Contraseña" class="w-full p-2 border rounded" required>
+                    <select id="reg-role" class="w-full p-2 border rounded">
+                        <option value="user">Usuario</option>
+                        <option value="owner">Owner</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                    <button type="submit" class="bg-emerald-500 text-white px-4 py-2 rounded">Registrar</button>
+                </form>
+            </div>
+            <div class="max-w-md mx-auto">
+                <h2 class="text-2xl font-bold mb-4">Login</h2>
+                <form id="login-form" class="space-y-4">
+                    <input type="text" id="login-username" placeholder="Usuario" class="w-full p-2 border rounded" required>
+                    <input type="password" id="login-password" placeholder="Contraseña" class="w-full p-2 border rounded" required>
+                    <button type="submit" class="bg-emerald-500 text-white px-4 py-2 rounded">Entrar</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
     <!-- Why Choose Us -->
     <section class="py-20 bg-white">
         <div class="container mx-auto px-4">
@@ -523,15 +550,61 @@
         document.getElementById('accept-cookies').addEventListener('click', function() {
             document.getElementById('cookie-banner').classList.add('hidden');
         });
-        
+
         document.getElementById('deny-cookies').addEventListener('click', function() {
             document.getElementById('cookie-banner').classList.add('hidden');
         });
-        
+
         // For demo purposes, show cookie banner after 1 second
         setTimeout(function() {
             document.getElementById('cookie-banner').classList.remove('hidden');
         }, 1000);
+
+        const API_URL = 'http://localhost:3000';
+
+        document.getElementById('register-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const res = await fetch(API_URL + '/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    username: document.getElementById('reg-username').value,
+                    password: document.getElementById('reg-password').value,
+                    role: document.getElementById('reg-role').value
+                })
+            });
+            const data = await res.json();
+            alert('Usuario creado con ID ' + data.id);
+        });
+
+        document.getElementById('login-form').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const res = await fetch(API_URL + '/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    username: document.getElementById('login-username').value,
+                    password: document.getElementById('login-password').value
+                })
+            });
+            const data = await res.json();
+            if (data.token) {
+                localStorage.setItem('token', data.token);
+                alert('Login correcto');
+            } else {
+                alert(data.message || 'Error');
+            }
+        });
+
+        async function fetchDashboard() {
+            const token = localStorage.getItem('token');
+            if (!token) return alert('No token stored');
+            const res = await fetch(API_URL + '/dashboard', {
+                headers: { 'Authorization': 'Bearer ' + token }
+            });
+            const data = await res.json();
+            alert(JSON.stringify(data));
+        }
     </script>
 </body>
 </html>
